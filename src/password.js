@@ -3,7 +3,10 @@ import React, { Component } from 'react'
 class Password extends Component {
     constructor(props) {
         super(props)
-        this.state = { password: 'p@ssw0rd' }
+        this.state = {
+            password: 'p@ssw0rd',
+            description: 'description',
+        }
     }
 
     charsList() {
@@ -19,20 +22,33 @@ class Password extends Component {
         return Math.floor(Math.random() * n)
     }
 
-    generatePassword() {
+    generatePassword(passwordLen = 8) {
         const chars = this.charsList()
         const randPassword = []
-        for (let i = 0; i < 8; i ++) {
+        for (let i = 0; i < passwordLen; i ++) {
+            if (i % 3 === 0 && i !== 0) {
+                randPassword.push(' - ')
+            }
           randPassword.push(chars[this.random(chars.length)])
         }
+
+
+
         return randPassword.join('')
     }
 
     render() {
-        const newPassword = this.generatePassword()
+        const newPassword = this.generatePassword(12)
         return (
             <div>
-                <div>{this.state.password}</div>
+                <input
+                    onChange={(e) => {this.setState({ password: e.target.value })}}
+                    value={this.state.password}
+                />
+                <input
+                    onChange={(e) => {this.setState({ description: e.target.value })}}
+                    value={this.state.description}
+                />
                 <div>
                     <button onClick={(e) => {
                         this.setState({ password: newPassword })
