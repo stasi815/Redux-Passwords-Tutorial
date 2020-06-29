@@ -1,11 +1,16 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { addPassword } from './actions';
+import zxcvbn from 'zxcvbn';
+import './password.css'
 
 class Password extends Component {
     constructor(props) {
         super(props)
         this.state = {
             password: 'p@ssw0rd',
-            description: 'description',
+            name: 'My Password',
+            strength: '0',
         }
     }
 
@@ -39,24 +44,57 @@ class Password extends Component {
 
     render() {
         const newPassword = this.generatePassword(12)
+        // const passwordStrength = zxcvbn(newPassword)
+        // console.log(passwordStrength.score)
         return (
             <div>
                 <input
-                    onChange={(e) => {this.setState({ password: e.target.value })}}
-                    value={this.state.password}
+                    onChange={(e) => {this.setState({ name: e.target.value })}}
+                    value={this.state.name}
                 />
                 <input
-                    onChange={(e) => {this.setState({ description: e.target.value })}}
-                    value={this.state.description}
+                    onChange={(e) => {
+                        const userPassScore = zxcvbn(this.state.password).score
+                        this.setState({ 
+                            password: e.target.value,
+                            strength: userPassScore,
+                        })
+                        console.log(userPassScore)
+                }}
+                    value={this.state.password}
                 />
+                <span>
+                Password Strength: {this.state.strength}
+                </span>
                 <div>
                     <button onClick={(e) => {
-                        this.setState({ password: newPassword })
+                        const passGenScore = zxcvbn(newPassword).score
+                        this.setState({ 
+                            password: newPassword,
+                            strength: passGenScore,
+                        })
                     }}>Generate</button>
+                </div>
+                <div>
+                    <button onClick={(e) => {
+                        this.props.addPassword(this.state.name, this.state.password)
+                    }}>Save</button>
                 </div>
             </div>
         )
     }
 }
 
-export default Password
+const mapStateToProps = (state) => {
+    return {
+
+    }
+  }
+
+  const mapDispatchToProps = () => {
+    return {
+      addPassword
+    }
+  }
+
+export default connect(mapStateToProps, mapDispatchToProps())(Password)
