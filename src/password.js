@@ -1,88 +1,69 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { addPassword } from './actions';
 import zxcvbn from 'zxcvbn';
-import './password.css'
+import './password.css';
+import StrengthCalc from './password-strength';
 
-class Password extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            password: 'p@ssw0rd',
-            name: 'My Password',
-            strength: '0',
+function charsList() {
+    const chars = []
+
+    for (let i = 33; i < 127; i ++) {
+      chars.push(String.fromCharCode(i))
+    }
+    return chars
+}
+
+function random(n) {
+    return Math.floor(Math.random() * n)
+}
+
+function generatePassword(passwordLen = 8) {
+    const chars = charsList()
+    const randPassword = []
+    for (let i = 0; i < passwordLen; i ++) {
+        if (i % 3 === 0 && i !== 0) {
+            randPassword.push(' - ')
         }
+      randPassword.push(chars[random(chars.length)])
     }
+    return randPassword.join('')
+}
 
-    charsList() {
-        const chars = []
+function Password(props) {
+        const [ password, setPassword ] = useState('p@ssw0rd')
+        const [ name, setName ] = useState('Name')
+        const newPassword = generatePassword(12)
 
-        for (let i = 33; i < 127; i ++) {
-          chars.push(String.fromCharCode(i))
-        }
-        return chars
-    }
-
-    random(n) {
-        return Math.floor(Math.random() * n)
-    }
-
-    generatePassword(passwordLen = 8) {
-        const chars = this.charsList()
-        const randPassword = []
-        for (let i = 0; i < passwordLen; i ++) {
-            if (i % 3 === 0 && i !== 0) {
-                randPassword.push(' - ')
-            }
-          randPassword.push(chars[this.random(chars.length)])
-        }
-
-
-
-        return randPassword.join('')
-    }
-
-    render() {
-        const newPassword = this.generatePassword(12)
-        // const passwordStrength = zxcvbn(newPassword)
-        // console.log(passwordStrength.score)
         return (
             <div>
                 <input
-                    onChange={(e) => {this.setState({ name: e.target.value })}}
-                    value={this.state.name}
+                    onChange={(e) => {
+                        setName(e.target.value)
+                    }}
+                    value={ name }
                 />
                 <input
                     onChange={(e) => {
-                        const userPassScore = zxcvbn(this.state.password).score
-                        this.setState({ 
-                            password: e.target.value,
-                            strength: userPassScore,
-                        })
-                        console.log(userPassScore)
+                        setPassword(e.target.value)
                 }}
-                    value={this.state.password}
+                    value={ password }
                 />
-                <span>
-                Password Strength: {this.state.strength}
-                </span>
+
+                <StrengthCalc password={ password }/>
+
                 <div>
-                    <button onClick={(e) => {
-                        const passGenScore = zxcvbn(newPassword).score
-                        this.setState({ 
-                            password: newPassword,
-                            strength: passGenScore,
-                        })
+                    <button className='button' onClick={(e) => {
+                        setPassword(newPassword)
                     }}>Generate</button>
                 </div>
                 <div>
-                    <button onClick={(e) => {
-                        this.props.addPassword(this.state.name, this.state.password)
+                    <button className='button' onClick={(e) => {
+                        addPassword(name, password)
                     }}>Save</button>
                 </div>
             </div>
         )
-    }
 }
 
 const mapStateToProps = (state) => {
